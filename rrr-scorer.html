@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>RRR Scorer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f8fafc;color:#1e293b;font-family:'Rajdhani','Segoe UI',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:5px;background:#f1f5f9;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+button{transition:transform 0.08s;cursor:pointer;font-family:'Rajdhani',sans-serif;}
+button:not(:disabled):active{transform:scale(0.93);}
+input{font-family:'Rajdhani',sans-serif;}
+.hdr{background:linear-gradient(135deg,#ffffff,#f1f5f9);border-bottom:2px solid #e2e8f0;padding:14px 14px 0;}
+.title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:#0284c7;line-height:1;}
+.sub{font-size:10px;color:#64748b;letter-spacing:3px;margin-top:2px;}
+.tabs{display:flex;margin-top:12px;}
+.tab{background:transparent;border:none;border-bottom:3px solid transparent;color:#94a3b8;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.tab.active{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-bottom-color:#0284c7;color:#0284c7;}
+.ref-bar{background:#f1f5f9;border-bottom:1px solid #e2e8f0;padding:7px 14px;display:flex;align-items:center;gap:8px;font-size:12px;}
+.content{max-width:700px;margin:0 auto;padding:14px 12px;}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:#ffffff;border:1.5px solid #0284c7;border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.05);}
+.l-input{width:100%;background:#ffffff;border:1.5px solid #cbd5e1;color:#0f172a;font-size:15px;padding:11px 14px;border-radius:8px;outline:none;margin-bottom:10px;text-align:center;}
+.l-btn{width:100%;background:linear-gradient(135deg,#0284c7,#0369a1);border:none;color:#fff;font-size:13px;font-weight:700;letter-spacing:3px;padding:11px;border-radius:8px;}
+.l-err{color:#dc2626;font-size:11px;margin-top:6px;}
+.mc{border-radius:14px;padding:13px 14px;margin-bottom:10px;background:#ffffff;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #e2e8f0;}
+.mh{display:flex;justify-content:space-between;margin-bottom:8px;}
+.ml{font-size:11px;font-weight:700;letter-spacing:2px;}
+.sr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tb{flex:1;text-align:center;}
+.tn{font-size:12px;margin-bottom:1px;font-weight:700;}
+.pn{font-size:10px;color:#64748b;margin-bottom:3px;min-height:13px;line-height:1.3;}
+.sn{font-family:'Bebas Neue',cursive;font-size:52px;line-height:1;}
+.deuce-banner{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:10px;padding:10px;text-align:center;margin-bottom:10px;animation:deuceFlash 0.8s infinite;}
+@keyframes deuceFlash{0%,100%{border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,0.2);}50%{border-color:#fbbf24;box-shadow:0 0 20px rgba(251,191,36,0.3);}}
+.deuce-text{font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:6px;color:#d97706;}
+.deuce-sub{font-size:11px;color:#92400e;margin-top:2px;}
+.pb{display:flex;height:3px;border-radius:2px;overflow:hidden;margin-bottom:10px;background:#e2e8f0;}
+.br{display:flex;gap:7px;}
+.pb2{flex:1;border-radius:8px;padding:10px 4px;font-size:11px;font-weight:700;letter-spacing:0.5px;border-width:1.5px;border-style:solid;}
+.ib{border-radius:8px;padding:8px 11px;font-size:14px;font-weight:700;border-width:1.5px;border-style:solid;}
+.pa{display:flex;align-items:center;gap:7px;margin-bottom:9px;padding:7px 11px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;}
+.pi{width:56px;background:#ffffff;border:1.5px solid #cbd5e1;color:#0284c7;font-size:17px;font-family:'Bebas Neue',cursive;text-align:center;padding:4px;border-radius:6px;outline:none;}
+.go-live-btn{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:2px solid #22c55e;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;letter-spacing:3px;margin-bottom:8px;}
+.submit-btn{width:100%;background:linear-gradient(135deg,#dc2626,#b91c1c);border:2px solid #ef4444;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;letter-spacing:3px;margin-top:8px;}
+.live-badge{display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:1px solid #86efac;color:#166534;border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700;}
+.locked-msg{background:#f0fdf4;border-radius:8px;padding:10px;font-size:12px;color:#166534;font-weight:700;letter-spacing:1px;text-align:center;}
+.set-blk{border-radius:10px;padding:10px 11px;margin-bottom:7px;background:#f1f5f9;border:1px solid #e2e8f0;}
+.set-ctrl{display:flex;align-items:center;gap:7px;}
+.st{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;}
+.ss{font-family:'Bebas Neue',cursive;font-size:30px;min-width:36px;text-align:center;}
+.ab{background:#ffffff;border:1px solid #cbd5e1;color:#475569;border-radius:6px;width:30px;height:30px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.ab:disabled{background:#f8fafc;border-color:#e2e8f0;color:#cbd5e1;}
+.cm-btn{width:100%;border-radius:8px;padding:10px;font-size:13px;font-weight:700;letter-spacing:2px;margin-top:4px;background:linear-gradient(135deg,#16a34a,#15803d);border:1.5px solid #22c55e;color:#fff;}
+.stbl{width:100%;border-collapse:collapse;font-size:12px;}
+.stbl th{padding:7px 8px;color:#0284c7;font-weight:700;letter-spacing:1px;border-bottom:2px solid #bae6fd;}
+.stbl td{padding:6px 8px;border-bottom:1px solid #e2e8f0;}
+/* Scorer lock banner */
+.lock-info{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#64748b;text-align:center;}
+.court-select{background:#ffffff;border:1.5px solid #0284c7;color:#0284c7;font-size:14px;font-weight:700;font-family:'Rajdhani',sans-serif;padding:9px 14px;border-radius:8px;width:100%;margin-bottom:12px;outline:none;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FC={apiKey:"AIzaSyBYKxzFoQAKKddALIDqtHtsKqlQkes3ax4",authDomain:"rrr-tournamet.firebaseapp.com",databaseURL:"https://rrr-tournamet-default-rtdb.firebaseio.com",projectId:"rrr-tournamet",storageBucket:"rrr-tournamet.firebasestorage.app",messagingSenderId:"368535382395",appId:"1:368535382395:web:c72ef4b64648b60ec175de"};
+const fb=initializeApp(FC), db=getDatabase(fb);
+const PASS="2026";
+
+// Courts 3→1, 4→2, 5→3 (physical courts renamed to displayed courts 1,2,3)
+const LM=[
+  {id:1,tA:"Team 1",tB:"Team 11",court:1,time:"10:00 AM"},{id:2,tA:"Team 13",tB:"Team 8",court:2,time:"10:00 AM"},
+  {id:3,tA:"Team 5",tB:"Team 3",court:3,time:"10:00 AM"},{id:4,tA:"Team 15",tB:"Team 14",court:1,time:"10:15 AM"},
+  {id:5,tA:"Team 16",tB:"Team 10",court:2,time:"10:15 AM"},{id:6,tA:"Team 2",tB:"Team 4",court:3,time:"10:15 AM"},
+  {id:7,tA:"Team 1",tB:"Team 18",court:1,time:"10:30 AM"},{id:8,tA:"Team 13",tB:"Team 6",court:2,time:"10:30 AM"},
+  {id:9,tA:"Team 5",tB:"Team 7",court:3,time:"10:30 AM"},{id:10,tA:"Team 15",tB:"Team 12",court:1,time:"10:45 AM"},
+  {id:11,tA:"Team 16",tB:"Team 9",court:2,time:"10:45 AM"},{id:12,tA:"Team 2",tB:"Team 17",court:3,time:"10:45 AM"},
+  {id:13,tA:"Team 11",tB:"Team 18",court:1,time:"11:00 AM"},{id:14,tA:"Team 8",tB:"Team 6",court:2,time:"11:00 AM"},
+  {id:15,tA:"Team 3",tB:"Team 7",court:3,time:"11:00 AM"},{id:16,tA:"Team 14",tB:"Team 12",court:1,time:"11:15 AM"},
+  {id:17,tA:"Team 10",tB:"Team 9",court:2,time:"11:15 AM"},{id:18,tA:"Team 4",tB:"Team 17",court:3,time:"11:15 AM"},
+];
+const QF=[{id:"QF1",sA:"Q2",sB:"Q5",court:1,time:"11:30 AM"},{id:"QF2",sA:"Q4",sB:"Q3",court:2,time:"11:30 AM"},{id:"QF3",sA:"Q7",sB:"Q6",court:1,time:"11:50 AM"},{id:"QF4",sA:"Q1",sB:"Q8",court:2,time:"11:50 AM"}];
+const SF=[{id:"SF1",sA:"W.QF1",sB:"W.QF2",court:1,time:"12:15 PM"},{id:"SF2",sA:"W.QF3",sB:"W.QF4",court:2,time:"12:15 PM"}];
+const FN={id:"F1",sA:"W.SF1",sB:"W.SF2",court:1,time:"12:50 PM"};
+const CC={1:"#0284c7",2:"#e67e22",3:"#16a34a"};
+
+// ── Deuce logic ──────────────────────────────────────────────
+// 21-pt: deuce at 20-20, cap at 29-29 (30th pt wins)
+// 15-pt: deuce at 14-14, cap at 20-20 (21st pt wins)
+function getDeuceAt(max){return max-1;}          // 21→20, 15→14
+function getCap(max){return max===21?30:21;}     // 21→30, 15→21
+
+function isDeuceActive(sA,sB,max){
+  const d=getDeuceAt(max);
+  return sA>=d&&sB>=d;
+}
+
+function getWinner(sA,sB,max,consec){
+  const cap=getCap(max);
+  if(isDeuceActive(sA,sB,max)){
+    if(sA>=cap) return "A";
+    if(sB>=cap) return "B";
+    if(sA-sB>=2) return "A";
+    if(sB-sA>=2) return "B";
+    return null;
+  }
+  if(sA>=max&&sA>sB) return "A";
+  if(sB>=max&&sB>sA) return "B";
+  return null;
+}
+
+function updateConsec(consec,side){
+  if(!consec||consec.team!==side) return {team:side,count:1};
+  return {team:side,count:consec.count+1};
+}
+
+// ── State ────────────────────────────────────────────────────
+let step="login",refName="",activeTab="league",assignedCourt=0;
+let ld={},kd={},td={};
+onValue(ref(db,"league"),s=>{ld=s.val()||{};render();});
+onValue(ref(db,"knockout"),s=>{kd=s.val()||{};render();});
+onValue(ref(db,"teams"),s=>{td=s.val()||{};render();});
+
+const gL=id=>ld[`m${id}`]||{sA:0,sB:0,history:[],confirmed:false,live:false,maxPts:21,consec:null};
+const gK=id=>kd[id]||{sets:[{a:0,b:0}],confirmed:false,live:false,maxPts:15};
+const gT=id=>td[`t${id}`]||{name:`Team ${id}`,p1:"",p2:"",p1avail:true,p2avail:true};
+const tN=id=>gT(id).name||`Team ${id}`;
+const tNum=s=>parseInt(s.split(" ")[1]);
+const sL=(id,v)=>set(ref(db,`league/m${id}`),v);
+const sK=(id,v)=>set(ref(db,`knockout/${id}`),v);
+
+function calcStandings(){
+  const map={};
+  for(let i=1;i<=18;i++) map[`Team ${i}`]={team:tN(i),id:i,wins:0,losses:0,pf:0,pa:0,diff:0,pts:0};
+  LM.forEach(m=>{
+    const s=gL(m.id);if(!s.confirmed)return;
+    map[m.tA].pf+=s.sA;map[m.tA].pa+=s.sB;map[m.tB].pf+=s.sB;map[m.tB].pa+=s.sA;
+    if(s.sA>s.sB){map[m.tA].wins++;map[m.tA].pts+=2;map[m.tB].losses++;}
+    else if(s.sB>s.sA){map[m.tB].wins++;map[m.tB].pts+=2;map[m.tA].losses++;}
+  });
+  Object.values(map).forEach(r=>r.diff=r.pf-r.pa);
+  return Object.values(map).sort((a,b)=>b.pts-a.pts||b.diff-a.diff||b.pf-a.pf);
+}
+
+function gKT(slot){
+  const q=calcStandings().slice(0,8);
+  if(slot.startsWith("Q")){const r=parseInt(slot.slice(1))-1;return q[r]?.team||slot;}
+  if(slot.startsWith("W.QF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=QF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  if(slot.startsWith("W.SF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=SF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  return slot;
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render(){
+  document.getElementById("app").innerHTML=step==="login"?rLogin():step==="name"?rName():step==="court"?rCourtSelect():rApp();
+}
+
+function rLogin(){
+  return `<div class="login-wrap"><div class="login-card">
+    <div style="font-size:34px;margin-bottom:8px">🏸</div>
+    <div class="title">RRR SCORER</div>
+    <div class="sub" style="margin-bottom:22px;color:#64748b;letter-spacing:3px">SCOREKEEPER ACCESS</div>
+    <input class="l-input" style="letter-spacing:4px" type="password" id="pw" placeholder="••••••••"/>
+    <button class="l-btn" id="lb">ENTER</button>
+    <div class="l-err" id="le"></div>
+  </div></div>`;
+}
+
+function rName(){
+  return `<div class="login-wrap"><div class="login-card">
+    <div style="font-size:32px;margin-bottom:8px">👤</div>
+    <div class="title">YOUR NAME</div>
+    <div class="sub" style="margin-bottom:22px">REFEREE / SCORER</div>
+    <input class="l-input" type="text" id="ni" placeholder="Enter your name" value="${refName}"/>
+    <button class="l-btn" id="nb">NEXT</button>
+    <div class="l-err" id="ne"></div>
+  </div></div>`;
+}
+
+function rCourtSelect(){
+  return `<div class="login-wrap"><div class="login-card">
+    <div style="font-size:32px;margin-bottom:8px">🏟️</div>
+    <div class="title">SELECT YOUR COURT</div>
+    <div class="sub" style="margin-bottom:22px">Hi ${refName} — which court are you scoring?</div>
+    <select class="court-select" id="courtSel" style="text-align:center;margin-bottom:14px">
+      <option value="0">Manage All Courts</option>
+      <option value="1">Court 1</option>
+      <option value="2">Court 2</option>
+      <option value="3">Court 3</option>
+    </select>
+    <button class="l-btn" id="cb">START SCORING</button>
+    <div class="l-err" id="ce"></div>
+    <div style="font-size:10px;color:#334;margin-top:10px;line-height:1.5">Select a court to filter matches, or 'Manage All' to see everything. You can change this later from the header.</div>
+  </div></div>`;
+}
+
+function rApp(){
+  const cc=LM.filter(m=>gL(m.id).confirmed).length;
+  const courtLabel=assignedCourt?`COURT ${assignedCourt}`:"ALL COURTS";
+  return `<div class="hdr">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <span style="font-size:26px">🏸</span>
+      <div><div class="title">RRR SCORER</div><div class="sub">${cc}/18 LEAGUE DONE</div></div>
+      <button id="lo" style="margin-left:auto;background:transparent;border:1px solid #e2e8f0;color:#64748b;border-radius:6px;padding:5px 10px;font-size:11px;">Exit</button>
+    </div>
+    <div class="tabs">
+      <button class="tab ${activeTab==='league'?'active':''}" data-tab="league">League</button>
+      <button class="tab ${activeTab==='standings'?'active':''}" data-tab="standings">Standings</button>
+      <button class="tab ${activeTab==='knockout'?'active':''}" data-tab="knockout">Knockout</button>
+    </div>
+  </div>
+  <div class="ref-bar">
+    <span style="font-size:10px;color:#64748b;letter-spacing:1px">SCORER:</span>
+    <span style="color:#0284c7;font-weight:700;font-size:12px">${refName}</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <span style="font-size:10px;background:#e0f2fe;border:1px solid #0284c740;color:#0284c7;border-radius:4px;padding:2px 8px;font-weight:700">🏟️ ${courtLabel}</span>
+      <button id="changeCourt" style="background:#ffffff;border:1px solid #cbd5e1;color:#64748b;font-size:9px;padding:2px 6px;border-radius:4px;cursor:pointer">Change</button>
+    </div>
+  </div>
+  <div class="content">${activeTab==='league'?rLeague():activeTab==='standings'?rStandings():rKnockout()}</div>`;
+}
+
+function isMyMatch(courtNum){
+  if(assignedCourt === 0) return true; // Manage All Courts mode
+  return courtNum===assignedCourt;
+}
+
+function rLeague(){
+  return `<div style="font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:12px">Set max pts → Go Live → Score → Submit to lock</div>`+LM.map(m=>rLC(m)).join('');
+}
+
+function rLC(m){
+  const s=gL(m.id);
+  const {sA=0,sB=0,history=[],confirmed=false,live=false,maxPts=21,consec=null}=s;
+  const cc=CC[m.court];
+  const tAn=tN(tNum(m.tA)), tBn=tN(tNum(m.tB));
+  const tAd=gT(tNum(m.tA)), tBd=gT(tNum(m.tB));
+  const deuce=isDeuceActive(sA,sB,maxPts);
+  const cap=getCap(maxPts);
+  const winner=getWinner(sA,sB,maxPts,consec);
+  const canSubmit=!!winner&&live;
+  const myMatch=isMyMatch(m.court);
+
+  if(confirmed) return `<div class="mc" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #22c55e;">
+    <div class="mh"><span class="ml" style="color:${cc}">MATCH ${m.id} · COURT ${m.court}</span><span style="font-size:10px;color:#94a3b8">${m.time}</span></div>
+    <div class="locked-msg">🔒 ${sA>sB?tAn:tBn} wins · ${sA}–${sB} · LOCKED</div>
+  </div>`;
+
+  // Locked for another court's scorer
+  if(!myMatch) return `<div class="mc" style="background:#f8fafc;border:1.5px solid #e2e8f0;opacity:0.65;">
+    <div class="mh"><span class="ml" style="color:#94a3b8">MATCH ${m.id} · COURT ${m.court}</span><span style="font-size:10px;color:#cbd5e1">${m.time}</span></div>
+    <div style="text-align:center;font-size:11px;color:#94a3b8;padding:8px 0">🔒 Court ${m.court} · Managed by another scorer</div>
+  </div>`;
+
+  return `<div class="mc" style="background:${live?'linear-gradient(135deg,#f0fdf4,#ffffff)':'#ffffff'};border:1.5px solid ${live?'#22c55e':cc};">
+    <div class="mh"><span class="ml" style="color:${cc}">MATCH ${m.id} · COURT ${m.court}</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#94a3b8">${m.time}</span>${live?`<span class="live-badge"><span style="width:6px;height:6px;background:#16a34a;border-radius:50%;display:inline-block;animation:pulse 1s infinite"></span>LIVE</span>`:''}</div></div>
+    ${!live?`<div class="pa"><span style="font-size:11px;color:#64748b;letter-spacing:1px">MAX PTS:</span><input class="pi" type="number" min="5" max="50" value="${maxPts}" data-action="lpts" data-id="${m.id}"/><button data-action="slpts" data-id="${m.id}" style="background:#f1f5f9;border:1px solid #cbd5e1;color:#0284c7;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;">SET</button><span style="font-size:10px;color:#94a3b8;margin-left:auto">First to ${maxPts} · Deuce @${getDeuceAt(maxPts)}-${getDeuceAt(maxPts)} · Cap ${cap}</span></div>`:''}
+    ${deuce?`<div class="deuce-banner"><div class="deuce-text">🏸 DEUCE!</div><div class="deuce-sub">${consec?.team?`${consec.team.toUpperCase()==="A"?tAn:tBn} leads · ${Math.abs(sA-sB)} pt lead`:'Win by 2 · Golden pt at '+cap}</div></div>`:''}
+    <div class="sr">
+      <div class="tb">
+        <div class="tn" style="color:${sA>sB?'#1e293b':'#94a3b8'}">${tAn}</div>
+        <div class="pn">${tAd.p1?`<span style="color:${tAd.p1avail!==false?'#16a34a':'#dc2626'}">●</span> ${tAd.p1}`:''}${tAd.p1&&tAd.p2?'<br>':''}${tAd.p2?`<span style="color:${tAd.p2avail!==false?'#16a34a':'#dc2626'}">●</span> ${tAd.p2}`:''}</div>
+        <div class="sn" style="color:${sA>sB?deuce?'#d97706':'#1e293b':'#cbd5e1'}">${sA}</div>
+      </div>
+      <div style="color:#e2e8f0;font-weight:900;font-size:16px;padding-bottom:28px">–</div>
+      <div class="tb">
+        <div class="tn" style="color:${sB>sA?'#1e293b':'#94a3b8'}">${tBn}</div>
+        <div class="pn">${tBd.p1?`<span style="color:${tBd.p1avail!==false?'#16a34a':'#dc2626'}">●</span> ${tBd.p1}`:''}${tBd.p1&&tBd.p2?'<br>':''}${tBd.p2?`<span style="color:${tBd.p2avail!==false?'#16a34a':'#dc2626'}">●</span> ${tBd.p2}`:''}</div>
+        <div class="sn" style="color:${sB>sA?deuce?'#d97706':'#1e293b':'#cbd5e1'}">${sB}</div>
+      </div>
+    </div>
+    ${!deuce?`<div class="pb"><div style="width:${Math.min(100,(sA/maxPts)*100)}%;background:#00c2ff;border-radius:2px;transition:width 0.15s"></div><div style="flex:1"></div><div style="width:${Math.min(100,(sB/maxPts)*100)}%;background:#ff6b35;border-radius:2px;transition:width 0.15s"></div></div>`:''}
+    ${!live
+      ?`<button class="go-live-btn" data-action="golive" data-id="${m.id}">🟢 GO LIVE</button>`
+      :`<div class="br" style="margin-bottom:8px">
+          <button class="pb2" data-action="score" data-id="${m.id}" data-side="A" ${winner?'disabled':''} style="background:${winner?'#f1f5f9':'#e0f2fe'};border-color:${winner?'#e2e8f0':'#0284c7'};color:${winner?'#cbd5e1':'#0284c7'};font-size:13px;padding:14px 4px">+1 ${tAn}</button>
+          <button class="pb2" data-action="score" data-id="${m.id}" data-side="B" ${winner?'disabled':''} style="background:${winner?'#f1f5f9':'#fef2f2'};border-color:${winner?'#e2e8f0':'#ef4444'};color:${winner?'#cbd5e1':'#ef4444'};font-size:13px;padding:14px 4px">+1 ${tBn}</button>
+          <button class="ib" data-action="undo" data-id="${m.id}" ${!history.length?'disabled':''} style="background:${history.length?'#ffffff':'#f8fafc'};border-color:${history.length?'#cbd5e1':'#e2e8f0'};color:${history.length?'#64748b':'#cbd5e1'}">↩</button>
+        </div>
+        ${canSubmit?`<button class="submit-btn" data-action="submit-league" data-id="${m.id}">🔒 SUBMIT & LOCK MATCH</button>`:''}`
+    }
+  </div>`;
+}
+
+function rStandings(){
+  const st=calcStandings();
+  const cc=LM.filter(m=>gL(m.id).confirmed).length;
+  if(!cc) return `<div style="text-align:center;padding:50px 20px;color:#94a3b8"><div style="font-size:36px">📊</div><div style="margin-top:8px">Score matches to see standings</div></div>`;
+  const rows=st.map((r,i)=>{const isQ=i<8;return `<tr style="background:${isQ?'#f0fdf4':i%2===0?'#ffffff':'#f8fafc'};border-bottom:1px solid #e2e8f0"><td style="text-align:center;padding:6px 7px;color:${isQ?'#16a34a':'#94a3b8'};font-weight:700">${i+1}</td><td style="padding:6px 7px;color:${isQ?'#1e293b':'#475569'};font-weight:${isQ?600:400}">${r.team}</td><td style="text-align:center;color:#16a34a">${r.wins}</td><td style="text-align:center;color:#dc2626">${r.losses}</td><td style="text-align:center;color:#475569">${r.pf}</td><td style="text-align:center;color:#475569">${r.pa}</td><td style="text-align:center;color:${r.diff>=0?'#16a34a':'#dc2626'};font-weight:700">${r.diff>=0?'+':''}${r.diff}</td><td style="text-align:center">${isQ?`<span style="background:#dcfce7;color:#166534;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:700">Q${i+1}</span>`:'—'}</td></tr>`;}).join('');
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:11px;color:#64748b">Top 8 qualify</span><span style="font-size:10px;background:#dcfce7;color:#166534;border-radius:6px;padding:2px 9px;font-weight:700">${cc}/18</span></div><div style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;overflow-x:auto"><table class="stbl"><thead><tr style="background:#f8fafc">${["#","Team","W","L","PF","PA","Diff",""].map(h=>`<th style="text-align:${h==='Team'?'left':'center'}">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function rKnockout(){
+  const secs=[
+    {title:"⚡ QUARTER FINALS",color:"#00c2ff",matches:QF,dp:15},
+    {title:"🔥 SEMI FINALS",color:"#ff6b35",matches:SF,dp:15},
+    {title:"👑 GRAND FINAL",color:"#ffd700",matches:[FN],dp:21}
+  ];
+  return secs.map(sec=>`<div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:4px;color:${sec.color};margin-bottom:10px">${sec.title}</div>${sec.matches.map(m=>rKC(m,sec.dp)).join('')}<div style="margin-bottom:14px"></div>`).join('');
+}
+
+function rKC(m,dp){
+  const ko=gK(m.id);
+  const {sets=[{a:0,b:0}],confirmed=false,live=false,maxPts=dp}=ko;
+  const tA=gKT(m.sA),tB=gKT(m.sB);
+  const cc=CC[m.court]||"#00c2ff";
+  const sw=sets.reduce((a,s)=>{if(s.confirmed){if(s.a>s.b)a.a++;else if(s.b>s.a)a.b++;}return a;},{a:0,b:0});
+  const winner=confirmed?(sw.a>sw.b?tA:tB):null;
+  const canConfirm=!confirmed&&(sw.a===2||sw.b===2);
+  const myMatch=isMyMatch(m.court);
+
+  if(confirmed) return `<div class="mc" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #22c55e;">
+    <div class="mh"><span class="ml" style="color:${cc}">${m.id} · COURT ${m.court}</span><span style="font-size:10px;color:#94a3b8">${m.time}</span></div>
+    <div class="locked-msg">🔒 ${winner} wins (${sw.a}–${sw.b} sets) · LOCKED</div>
+  </div>`;
+
+  if(!myMatch) return `<div class="mc" style="background:#f8fafc;border:1.5px solid #e2e8f0;opacity:0.65;">
+    <div class="mh"><span class="ml" style="color:#94a3b8">${m.id} · COURT ${m.court}</span><span style="font-size:10px;color:#cbd5e1">${m.time}</span></div>
+    <div style="text-align:center;font-size:11px;color:#94a3b8;padding:8px 0">🔒 Court ${m.court} · Managed by another scorer</div>
+  </div>`;
+
+  const setsHtml=sets.map((s,idx)=>{
+    if(s.confirmed){
+      const deuce=isDeuceActive(s.a,s.b,maxPts);
+      return `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:7px 11px;margin-bottom:6px;font-size:11px;color:#166534;font-weight:700">SET ${idx+1}: ${s.a>s.b?tA:tB} wins ${s.a}–${s.b}${deuce?' (D)':''}</div>`;
+    }
+    const deuce=isDeuceActive(s.a,s.b,maxPts);
+    const cap=getCap(maxPts);
+    const sw2=getWinner(s.a,s.b,maxPts,s.consec);
+    return `<div class="set-blk" style="background:#f8fafc;border:1px solid #e2e8f0">
+      <div style="font-size:11px;color:#64748b;letter-spacing:2px;font-weight:700;margin-bottom:${deuce?4:8}px">SET ${idx+1} · up to ${maxPts} pts${deuce?' · GOLDEN PT @ '+cap:''}</div>
+      ${deuce?`<div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:6px;padding:5px 8px;margin-bottom:8px;text-align:center"><span style="font-family:'Bebas Neue',cursive;font-size:18px;color:#d97706;letter-spacing:4px">DEUCE!</span>${s.consec?.team?`<span style="font-size:10px;color:#92400e;margin-left:8px">${s.consec.team.toUpperCase()==="A"?tA:tB} leads · ${Math.abs(s.a-s.b)} pt lead</span>`:''}</div>`:''}
+      <div class="set-ctrl">
+        <div class="st"><button class="ab" data-action="aks" data-mid="${m.id}" data-si="${idx}" data-side="A" data-d="-1" ${s.a<=0||sw2?'disabled':''}>–</button><span class="ss" style="color:${s.a>s.b?deuce?'#d97706':'#1e293b':'#cbd5e1'}">${s.a}</span><button class="ab" data-action="aks" data-mid="${m.id}" data-si="${idx}" data-side="A" data-d="1" ${sw2?'disabled':''}>+</button></div>
+        <div style="color:#e2e8f0;font-weight:900;font-size:13px">:</div>
+        <div class="st"><button class="ab" data-action="aks" data-mid="${m.id}" data-si="${idx}" data-side="B" data-d="-1" ${s.b<=0||sw2?'disabled':''}>–</button><span class="ss" style="color:${s.b>s.a?deuce?'#d97706':'#1e293b':'#cbd5e1'}">${s.b}</span><button class="ab" data-action="aks" data-mid="${m.id}" data-si="${idx}" data-side="B" data-d="1" ${sw2?'disabled':''}>+</button></div>
+        <button data-action="cset" data-mid="${m.id}" data-si="${idx}" ${!sw2?'disabled':''} style="background:${sw2?'#dcfce7':'#f1f5f9'};border:1.5px solid ${sw2?'#22c55e':'#cbd5e1'};color:${sw2?'#166534':'#94a3b8'};border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;">Done</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="mc" style="background:#ffffff;border:1.5px solid ${cc};">
+    <div class="mh"><span class="ml" style="color:${cc}">${m.id} · COURT ${m.court}</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#94a3b8">${m.time}</span>${live?`<span class="live-badge"><span style="width:6px;height:6px;background:#16a34a;border-radius:50%;display:inline-block"></span>LIVE</span>`:''}</div></div>
+    ${!live?`<div class="pa"><span style="font-size:11px;color:#64748b">PTS/SET:</span><input class="pi" type="number" min="5" max="50" value="${maxPts}" data-action="kpts" data-mid="${m.id}"/><button data-action="skpts" data-mid="${m.id}" style="background:#f1f5f9;border:1px solid #cbd5e1;color:#0284c7;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;">SET</button></div>`:''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="flex:1"><div style="font-size:13px;color:#1e293b;font-weight:700">${tA}</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">sets won</div></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-family:'Bebas Neue',cursive;font-size:36px;color:${sw.a>sw.b?'#1e293b':'#cbd5e1'}">${sw.a}</span><span style="color:#e2e8f0;font-size:16px;font-weight:900">–</span><span style="font-family:'Bebas Neue',cursive;font-size:36px;color:${sw.b>sw.a?'#1e293b':'#cbd5e1'}">${sw.b}</span></div>
+      <div style="flex:1;text-align:right"><div style="font-size:13px;color:#1e293b;font-weight:700">${tB}</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">sets won</div></div>
+    </div>
+    ${setsHtml}
+    ${!live?`<button class="go-live-btn" data-action="ko-golive" data-mid="${m.id}">🟢 GO LIVE</button>`:''}
+    ${canConfirm&&live?`<button class="submit-btn" data-action="submit-ko" data-mid="${m.id}">🔒 SUBMIT & LOCK MATCH</button>`:canConfirm?`<button class="cm-btn" data-action="submit-ko" data-mid="${m.id}">✓ CONFIRM MATCH RESULT</button>`:''}
+  </div>`;
+}
+
+// ── Event Handlers ────────────────────────────────────────────
+// ── Event Handling (Delegation) ──────────────────────────────
+document.getElementById("app").addEventListener("click", e => {
+  const el = e.target.closest("[data-action], [data-tab], #lb, #nb, #cb, #lo, #changeCourt");
+  if (!el) return;
+
+  // Tabs
+  if (el.dataset.tab) {
+    activeTab = el.dataset.tab;
+    render();
+    return;
+  }
+
+  // IDs & Simple Actions
+  const id = el.id;
+  if (id === "lb") {
+    const pw = document.getElementById("pw");
+    if (pw.value === PASS) { step = "name"; render(); }
+    else document.getElementById("le").textContent = "Wrong password";
+  } else if (id === "nb") {
+    const ni = document.getElementById("ni");
+    const v = ni.value.trim();
+    if (!v) { document.getElementById("ne").textContent = "Enter name"; return; }
+    refName = v; step = "court"; render();
+  } else if (id === "cb") {
+    const sel = document.getElementById("courtSel");
+    const v = parseInt(sel.value);
+    if (isNaN(v)) { document.getElementById("ce").textContent = "Select court"; return; }
+    assignedCourt = v; step = "app"; render();
+  } else if (id === "lo") {
+    step = "login"; refName = ""; assignedCourt = 0; activeTab = "league"; render();
+  } else if (id === "changeCourt") {
+    step = "court"; render();
+  }
+
+  // Data Actions
+  const a = el.dataset.action;
+  if (!a) return;
+  const mid = el.dataset.id || el.dataset.mid;
+  if (!mid) return;
+
+  if (a === "slpts") {
+    const inp = document.querySelector(`[data-action="lpts"][data-id="${mid}"]`);
+    const p = Math.max(5, Math.min(50, +inp.value || 21));
+    const s = gL(mid);
+    sL(mid, { ...s, maxPts: p });
+    el.textContent = "✓"; setTimeout(() => el.textContent = "SET", 1200);
+  } else if (a === "golive") {
+    // Make only one match live per court (flexible)
+    const midNum = +mid;
+    const m = LM.find(x => x.id === midNum);
+    if (m) {
+      LM.forEach(x => {
+        if (x.court === m.court && x.id !== m.id) {
+          const os = gL(x.id);
+          if (os.live) sL(x.id, { ...os, live: false });
+        }
+      });
+    }
+    const s = gL(mid);
+    sL(mid, { ...s, sA: s.sA || 0, sB: s.sB || 0, live: true, scorerName: refName });
+  } else if (a === "score") {
+    const side = el.dataset.side;
+    const s = gL(mid);
+    if (s.confirmed || !s.live) return;
+    const curA = s.sA || 0, curB = s.sB || 0;
+    const h = [...(s.history || []), { sA: curA, sB: curB, consec: s.consec || null }];
+    const ns = { ...s, sA: curA, sB: curB, history: h };
+    if (side === "A") { ns.sA = curA + 1; ns.consec = updateConsec(s.consec, "A"); }
+    else { ns.sB = curB + 1; ns.consec = updateConsec(s.consec, "B"); }
+    sL(mid, ns);
+  } else if (a === "undo") {
+    const mid = +el.dataset.id;
+    const s = gL(mid);
+    if (!s.history?.length) return;
+    const prev = s.history[s.history.length - 1];
+    sL(mid, { ...s, ...prev, history: s.history.slice(0, -1) });
+  } else if (a === "submit-league") {
+    const mid = +el.dataset.id;
+    const s = gL(mid);
+    if (!confirm(`Submit match?`)) return;
+    sL(mid, { ...s, confirmed: true, live: false, scoredBy: refName });
+  } else if (a === "skpts") {
+    const mid = el.dataset.mid;
+    const inp = document.querySelector(`[data-action="kpts"][data-mid="${mid}"]`);
+    const p = Math.max(5, Math.min(50, +inp.value || 15));
+    const ko = gK(mid);
+    sK(mid, { ...ko, maxPts: p });
+    el.textContent = "✓"; setTimeout(() => el.textContent = "SET", 1200);
+  } else if (a === "ko-golive") {
+    const mid = el.dataset.mid;
+    const ko = gK(mid);
+    sK(mid, { ...ko, live: true, scorerName: refName });
+  } else if (a === "aks") {
+    const si = +el.dataset.si, side = el.dataset.side, d = +el.dataset.d;
+    const ko = gK(mid);
+    const pk = side.toLowerCase();
+    const sets = (ko.sets || [{ a: 0, b: 0 }]).map((sv, i) => {
+      if (i !== si) return sv;
+      const nv = Math.max(0, (sv[pk] || 0) + d);
+      const ns = { ...sv, a: sv.a || 0, b: sv.b || 0, [pk]: nv };
+      if (d > 0) ns.consec = updateConsec(sv.consec, side);
+      else ns.consec = null;
+      return ns;
+    });
+    sK(mid, { ...ko, sets });
+  } else if (a === "cset") {
+    const mid = el.dataset.mid, si = +el.dataset.si;
+    const ko = gK(mid); const sv = ko.sets[si];
+    const w = getWinner(sv.a, sv.b, ko.maxPts || 15, sv.consec);
+    if (!w) return;
+    const sets = ko.sets.map((v, i) => i === si ? { ...v, confirmed: true } : v);
+    const sw = sets.reduce((acc, v) => { if (v.confirmed) { if (v.a > v.b) acc.a++; else acc.b++; } return acc; }, { a: 0, b: 0 });
+    if (sw.a < 2 && sw.b < 2 && sets.length < 3) sK(mid, { ...ko, sets: [...sets, { a: 0, b: 0 }] });
+    else sK(mid, { ...ko, sets });
+  } else if (a === "submit-ko") {
+    const mid = el.dataset.mid; const ko = gK(mid);
+    const sw = ko.sets.reduce((acc, sv) => { if (sv.confirmed) { if (sv.a > sv.b) acc.a++; else acc.b++; } return acc; }, { a: 0, b: 0 });
+    if (sw.a === sw.b || !confirm(`Submit match?`)) return;
+    sK(mid, { ...ko, confirmed: true, live: false, scoredBy: refName });
+  }
+});
+
+// Enter key support
+document.getElementById("app").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const el = e.target;
+    if (el.id === "pw") document.getElementById("lb")?.click();
+    if (el.id === "ni") document.getElementById("nb")?.click();
+  }
+});
+
+render();
+</script>
+<style>@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+</body>
+</html>
