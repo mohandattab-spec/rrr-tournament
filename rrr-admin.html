@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>RRR Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#060d18;color:#ccd;font-family:'Rajdhani','Segoe UI',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:5px;background:#0a1628;}::-webkit-scrollbar-thumb{background:#0d3060;border-radius:3px;}
+button{transition:transform 0.08s;cursor:pointer;font-family:'Rajdhani',sans-serif;}
+button:not(:disabled):active{transform:scale(0.93);}
+input{font-family:'Rajdhani',sans-serif;}
+.hdr{background:linear-gradient(135deg,#020a14,#0a1f35);border-bottom:2px solid #3a2a00;padding:14px 14px 0;}
+.title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:#ffd700;line-height:1;}
+.sub{font-size:10px;color:#554400;letter-spacing:3px;margin-top:2px;}
+.tabs{display:flex;margin-top:12px;overflow-x:auto;}
+.tab{background:transparent;border:none;border-bottom:3px solid transparent;color:#554400;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.tab.active{background:linear-gradient(135deg,#1a1000,#2a1a00);border-bottom-color:#ffd700;color:#ffd700;}
+.content{max-width:700px;margin:0 auto;padding:14px 12px;}
+.sec{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:4px;margin-bottom:12px;}
+.inp{width:100%;background:#070f1e;border:1.5px solid #1a3060;color:#fff;font-size:14px;padding:9px 12px;border-radius:8px;outline:none;margin-bottom:7px;}
+.inp:focus{border-color:#ffd700;}
+.btn-gold{background:linear-gradient(135deg,#3a2800,#5a3a00);color:#ffd700;border:1.5px solid #ffd700;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:1px;}
+.btn-red{background:#1a0505;color:#ff6b6b;border:1.5px solid #ff4444;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;}
+.btn-green{background:#001a0d;color:#00e676;border:1.5px solid #00e676;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;}
+.btn-sm{border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;border-width:1.5px;border-style:solid;}
+.team-card{background:linear-gradient(135deg,#0d1b2a,#112035);border:1.5px solid #1a3060;border-radius:12px;padding:13px 14px;margin-bottom:10px;}
+.player-row{display:flex;gap:7px;align-items:center;margin-bottom:7px;}
+.match-card{border-radius:12px;padding:13px 14px;margin-bottom:10px;}
+.pts-inp{width:64px;background:#070f1e;border:1.5px solid #1a3060;color:#ffd700;font-size:17px;font-family:'Bebas Neue',cursive;text-align:center;padding:5px;border-radius:6px;outline:none;}
+.badge{border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
+.b-green{background:#003322;color:#00e676;}
+.b-yellow{background:#1a1000;color:#ffd700;}
+.b-live{background:#001a0d;color:#00e676;border:1px solid #00e67640;}
+.warn{background:#1a0d00;border:1px solid #ff6b35;border-radius:10px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:#ff6b35;}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:linear-gradient(135deg,#0d1b2a,#112035);border:1.5px solid #ffd700;border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center;}
+.l-inp{width:100%;background:#070f1e;border:1.5px solid #1a3060;color:#fff;font-size:15px;padding:11px 14px;border-radius:8px;outline:none;margin-bottom:10px;text-align:center;letter-spacing:4px;}
+.l-btn{width:100%;background:linear-gradient(135deg,#3a2800,#5a3a00);border:1.5px solid #ffd700;color:#ffd700;font-size:13px;font-weight:700;letter-spacing:3px;padding:11px;border-radius:8px;}
+.l-err{color:#ff6b6b;font-size:11px;margin-top:6px;}
+/* Champion display in admin */
+.champ-admin{background:linear-gradient(135deg,#1a1000,#2a1a00);border:2px solid #ffd700;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;box-shadow:0 0 28px rgba(255,215,0,0.2);}
+.runner-admin{background:linear-gradient(135deg,#0d1824,#112035);border:2px solid #aaa;border-radius:14px;padding:14px;text-align:center;margin-bottom:18px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const FC={apiKey:"AIzaSyBYKxzFoQAKKddALIDqtHtsKqlQkes3ax4",authDomain:"rrr-tournamet.firebaseapp.com",databaseURL:"https://rrr-tournamet-default-rtdb.firebaseio.com",projectId:"rrr-tournamet",storageBucket:"rrr-tournamet.firebasestorage.app",messagingSenderId:"368535382395",appId:"1:368535382395:web:c72ef4b64648b60ec175de"};
+const fb=initializeApp(FC),db=getDatabase(fb);
+const PASS="RRR@admin2024";
+
+// Courts 3→1, 4→2, 5→3
+const LM=[{id:1,tA:"Team 1",tB:"Team 11",court:1,time:"10:00 AM"},{id:2,tA:"Team 13",tB:"Team 8",court:2,time:"10:00 AM"},{id:3,tA:"Team 5",tB:"Team 3",court:3,time:"10:00 AM"},{id:4,tA:"Team 15",tB:"Team 14",court:1,time:"10:15 AM"},{id:5,tA:"Team 16",tB:"Team 10",court:2,time:"10:15 AM"},{id:6,tA:"Team 2",tB:"Team 4",court:3,time:"10:15 AM"},{id:7,tA:"Team 1",tB:"Team 18",court:1,time:"10:30 AM"},{id:8,tA:"Team 13",tB:"Team 6",court:2,time:"10:30 AM"},{id:9,tA:"Team 5",tB:"Team 7",court:3,time:"10:30 AM"},{id:10,tA:"Team 15",tB:"Team 12",court:1,time:"10:45 AM"},{id:11,tA:"Team 16",tB:"Team 9",court:2,time:"10:45 AM"},{id:12,tA:"Team 2",tB:"Team 17",court:3,time:"10:45 AM"},{id:13,tA:"Team 11",tB:"Team 18",court:1,time:"11:00 AM"},{id:14,tA:"Team 8",tB:"Team 6",court:2,time:"11:00 AM"},{id:15,tA:"Team 3",tB:"Team 7",court:3,time:"11:00 AM"},{id:16,tA:"Team 14",tB:"Team 12",court:1,time:"11:15 AM"},{id:17,tA:"Team 10",tB:"Team 9",court:2,time:"11:15 AM"},{id:18,tA:"Team 4",tB:"Team 17",court:3,time:"11:15 AM"}];
+const QF=[{id:"QF1",sA:"Q2",sB:"Q5",court:1,time:"11:30 AM"},{id:"QF2",sA:"Q4",sB:"Q3",court:2,time:"11:30 AM"},{id:"QF3",sA:"Q7",sB:"Q6",court:1,time:"11:50 AM"},{id:"QF4",sA:"Q1",sB:"Q8",court:2,time:"11:50 AM"}];
+const SF=[{id:"SF1",sA:"W.QF1",sB:"W.QF2",court:1,time:"12:15 PM"},{id:"SF2",sA:"W.QF3",sB:"W.QF4",court:2,time:"12:15 PM"}];
+const FN={id:"F1",sA:"W.SF1",sB:"W.SF2",court:1,time:"12:50 PM"};
+const CC={1:"#00c2ff",2:"#ff6b35",3:"#00e676"};
+// Default pts per match: QF=15, SF=15, Final=21
+const DP={"QF1":15,"QF2":15,"QF3":15,"QF4":15,"SF1":15,"SF2":15,"F1":21};
+
+let loggedIn=false,tab="teams",ld={},kd={},td={};
+const pending={};
+onValue(ref(db,"league"),s=>{ld=s.val()||{};render();});
+onValue(ref(db,"knockout"),s=>{kd=s.val()||{};render();});
+onValue(ref(db,"teams"),s=>{td=s.val()||{};render();});
+
+const gL=id=>ld[`m${id}`]||{sA:0,sB:0,confirmed:false,live:false,maxPts:21};
+const gK=id=>kd[id]||{sets:[{a:0,b:0}],confirmed:false,live:false,maxPts:DP[id]||15};
+const gT=id=>td[`t${id}`]||{name:`Team ${id}`,p1:"",p2:"",p1avail:true,p2avail:true};
+const tN=id=>gT(id).name||`Team ${id}`;
+const tNum=s=>parseInt(s.split(" ")[1]);
+
+// Deuce helpers
+function getDeuceAt(max){return max-1;}
+function getCap(max){return max===21?30:21;}
+
+function calcStandings(){
+  const map={};for(let i=1;i<=18;i++)map[`Team ${i}`]={team:tN(i),wins:0,losses:0,pf:0,pa:0,diff:0,pts:0};
+  LM.forEach(m=>{const s=gL(m.id);if(!s.confirmed)return;map[m.tA].pf+=s.sA;map[m.tA].pa+=s.sB;map[m.tB].pf+=s.sB;map[m.tB].pa+=s.sA;if(s.sA>s.sB){map[m.tA].wins++;map[m.tA].pts+=2;map[m.tB].losses++;}else{map[m.tB].wins++;map[m.tB].pts+=2;map[m.tA].losses++;}});
+  Object.values(map).forEach(r=>r.diff=r.pf-r.pa);
+  return Object.values(map).sort((a,b)=>b.pts-a.pts||b.diff-a.diff);
+}
+
+function gKT(slot){
+  const q=calcStandings().slice(0,8);
+  if(slot.startsWith("Q")){const r=parseInt(slot.slice(1))-1;return q[r]?.team||slot;}
+  if(slot.startsWith("W.QF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=QF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  if(slot.startsWith("W.SF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=SF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  return slot;
+}
+
+function getTeamNumByName(teamName){
+  for(let i=1;i<=18;i++){if(tN(i)===teamName)return i;}
+  return null;
+}
+
+function renderTeamPlayersSummary(teamName){
+  const num=getTeamNumByName(teamName);
+  if(!num) return '';
+  const t=gT(num);
+  const players=[t.p1,t.p2].filter(Boolean);
+  return players.length?`<div style="font-size:11px;color:#aa8800;margin-top:4px">${players.join(' &amp; ')}</div>`:'';
+}
+
+function render(){document.getElementById("app").innerHTML=loggedIn?rApp():rLogin();attach();}
+
+function rLogin(){return `<div class="login-wrap"><div class="login-card"><div style="font-size:34px;margin-bottom:8px">⚙️</div><div class="title">RRR ADMIN</div><div style="font-size:10px;color:#554400;letter-spacing:3px;margin-bottom:22px">ADMIN ACCESS ONLY</div><input class="l-inp" type="password" id="pw" placeholder="••••••••"/><button class="l-btn" id="lb">ENTER</button><div class="l-err" id="le"></div></div></div>`;}
+
+function rApp(){
+  // Check if Finals is done for champion banner
+  const fKO=gK("F1");
+  const fW=fKO.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});
+  const champion=fKO.confirmed?(fW.a>fW.b?gKT(FN.sA):gKT(FN.sB)):null;
+  const runnerUp=fKO.confirmed?(fW.a>fW.b?gKT(FN.sB):gKT(FN.sA)):null;
+
+  return `<div class="hdr"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><span style="font-size:26px">⚙️</span><div><div class="title">RRR ADMIN</div><div class="sub">FULL CONTROL</div></div><button id="lo" style="margin-left:auto;background:transparent;border:1px solid #334;color:#556;border-radius:6px;padding:5px 10px;font-size:11px;">Logout</button></div>
+  <div class="tabs"><button class="tab ${tab==="teams"?"active":""}" data-tab="teams">👥 Teams</button><button class="tab ${tab==="league"?"active":""}" data-tab="league">🏸 League</button><button class="tab ${tab==="knockout"?"active":""}" data-tab="knockout">🏆 Knockout</button></div></div>
+  <div class="content">
+    ${champion?`<div class="champ-admin"><div style="font-size:32px">🏆</div><div style="font-family:'Bebas Neue',cursive;font-size:22px;color:#ffd700;letter-spacing:4px">CHAMPION</div><div style="font-size:18px;color:#fff;font-weight:700;margin-top:4px">${champion}</div>${renderTeamPlayersSummary(champion)}</div><div class="runner-admin"><div style="font-size:22px">🥈</div><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:#bbb;letter-spacing:4px">RUNNER-UP</div><div style="font-size:15px;color:#ccd;font-weight:700;margin-top:4px">${runnerUp}</div>${renderTeamPlayersSummary(runnerUp)}</div>`:''}
+    ${tab==="teams"?rTeams():tab==="league"?rLeague():rKnockout()}
+  </div>`;
+}
+
+function rTeams(){
+  let h=`<div class="sec" style="color:#ffd700">👥 TEAM & PLAYER MANAGEMENT</div>
+  <div style="font-size:11px;color:#554;margin-bottom:12px">Changes save to Firebase and reflect immediately in all views including Knockout and Finals.</div>`;
+  for(let i=1;i<=18;i++){
+    const t=gT(i);
+    h+=`<div class="team-card">
+      <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:#ffd700;margin-bottom:9px">TEAM ${i}</div>
+      <input class="inp" placeholder="Team name (e.g. Aces)" value="${t.name||""}" data-f="name" data-tid="${i}"/>
+      <div class="player-row">
+        <input class="inp" style="margin:0;flex:1" placeholder="Player 1 name" value="${t.p1||""}" data-f="p1" data-tid="${i}"/>
+        <button class="btn-sm" data-action="tp1" data-tid="${i}" style="background:${t.p1avail!==false?"#003322":"#1a0505"};border-color:${t.p1avail!==false?"#00e676":"#ff4444"};color:${t.p1avail!==false?"#00e676":"#ff6b6b"}">${t.p1avail!==false?"✓ In":"✗ Out"}</button>
+      </div>
+      <div style="height:6px"></div>
+      <div class="player-row">
+        <input class="inp" style="margin:0;flex:1" placeholder="Player 2 name" value="${t.p2||""}" data-f="p2" data-tid="${i}"/>
+        <button class="btn-sm" data-action="tp2" data-tid="${i}" style="background:${t.p2avail!==false?"#003322":"#1a0505"};border-color:${t.p2avail!==false?"#00e676":"#ff4444"};color:${t.p2avail!==false?"#00e676":"#ff6b6b"}">${t.p2avail!==false?"✓ In":"✗ Out"}</button>
+      </div>
+      <button class="btn-gold" style="width:100%;margin-top:10px" data-action="save-team" data-tid="${i}">SAVE TEAM ${i}</button>
+    </div>`;
+  }
+  return h;
+}
+
+function rLeague(){
+  let h=`<div class="sec" style="color:#ffd700">🏸 LEAGUE CONTROL</div><div class="warn">⚠️ Only admin can reset locked matches. Scorers cannot edit after submitting.</div>
+  <div style="font-size:11px;color:#554;margin-bottom:12px">Deuce rules: 21-pt games → deuce at 20-20, golden pt at 30. 15-pt games → deuce at 14-14, golden pt at 21.</div>`;
+  LM.forEach(m=>{
+    const s=gL(m.id);const cc=CC[m.court];
+    const tAn=tN(tNum(m.tA)),tBn=tN(tNum(m.tB));
+    const status=s.confirmed?"LOCKED":s.live?"LIVE":"OPEN";
+    const maxPts=s.maxPts||21;
+    const deuceAt=getDeuceAt(maxPts);
+    const cap=getCap(maxPts);
+    h+=`<div class="match-card" style="background:${s.confirmed?"linear-gradient(135deg,#051a0e,#0a2a18)":"linear-gradient(135deg,#0d1b2a,#112035)"};border:1.5px solid ${s.confirmed?"#00e676":s.live?"#00e676":cc}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <span style="font-size:11px;color:${cc};font-weight:700;letter-spacing:2px">MATCH ${m.id} · COURT ${m.court} · ${m.time}</span>
+        <span class="badge ${s.confirmed?"b-green":s.live?"b-live":"b-yellow"}">${status}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#ccd;margin-bottom:4px"><span>${tAn}</span><span style="color:#334">VS</span><span>${tBn}</span></div>
+      <div style="font-size:10px;color:#446;margin-bottom:8px">Deuce @ ${deuceAt}-${deuceAt} · Golden pt @ ${cap}</div>
+      ${s.confirmed?`<div style="font-size:12px;color:#00e676;margin-bottom:8px;font-weight:700">Final: ${s.sA} – ${s.sB}</div>`:""}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:11px;color:#778">MAX PTS:</span>
+        <input class="pts-inp" type="number" min="5" max="50" value="${maxPts}" data-action="lpts" data-id="${m.id}" ${s.confirmed?"disabled":""}/>
+        <button class="btn-gold" data-action="slpts" data-id="${m.id}" ${s.confirmed?"disabled":""} style="${s.confirmed?"opacity:0.3":""}">SET</button>
+        <button class="btn-red" data-action="reset-l" data-id="${m.id}" style="margin-left:auto">🔄 RESET</button>
+      </div>
+    </div>`;
+  });
+  return h;
+}
+
+function rKnockout(){
+  const fKO=gK("F1");
+  const fW=fKO.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});
+  const champion=fKO.confirmed?(fW.a>fW.b?gKT(FN.sA):gKT(FN.sB)):null;
+  const runnerUp=fKO.confirmed?(fW.a>fW.b?gKT(FN.sB):gKT(FN.sA)):null;
+
+  let h=`<div class="sec" style="color:#ffd700">🏆 KNOCKOUT CONTROL</div><div class="warn">⚠️ Reset clears all set scores and unlocks the match.</div>
+  <div style="font-size:11px;color:#554;margin-bottom:12px">Team names and player names are pulled automatically from Admin team data. QF/SF: 15 pts/set. Final: 21 pts/set.</div>`;
+
+  if(champion){
+    h+=`<div class="champ-admin"><div style="font-size:28px">🏆</div><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:#ffd700;letter-spacing:4px">CHAMPION</div><div style="font-size:17px;color:#fff;font-weight:700;margin-top:4px">${champion}</div>${renderTeamPlayersSummary(champion)}</div>
+    <div class="runner-admin"><div style="font-size:20px">🥈</div><div style="font-family:'Bebas Neue',cursive;font-size:16px;color:#bbb;letter-spacing:4px">RUNNER-UP</div><div style="font-size:14px;color:#ccd;font-weight:700;margin-top:4px">${runnerUp}</div>${renderTeamPlayersSummary(runnerUp)}</div>`;
+  }
+
+  [...QF,...SF,FN].forEach(m=>{
+    const ko=gK(m.id);const cc=CC[m.court]||"#00c2ff";
+    const tA=gKT(m.sA),tB=gKT(m.sB);
+    const sw=ko.sets.reduce((a,s)=>{if(s.confirmed){if(s.a>s.b)a.a++;else if(s.b>s.a)a.b++;}return a;},{a:0,b:0});
+    const status=ko.confirmed?"LOCKED":ko.live?"LIVE":"OPEN";
+    const maxPts=ko.maxPts||DP[m.id]||15;
+    const deuceAt=getDeuceAt(maxPts);
+    const cap=getCap(maxPts);
+    const scorer=ko.scoredBy||ko.scorerName||'';
+    h+=`<div class="match-card" style="background:${ko.confirmed?"linear-gradient(135deg,#051a0e,#0a2018)":"linear-gradient(135deg,#0d1b2a,#112035)"};border:1.5px solid ${ko.confirmed?"#00e676":ko.live?"#00e676":cc}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <span style="font-size:11px;color:${cc};font-weight:700;letter-spacing:2px">${m.id} · COURT ${m.court} · ${m.time}</span>
+        <span class="badge ${ko.confirmed?"b-green":ko.live?"b-live":"b-yellow"}">${status}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#ccd;margin-bottom:2px"><span>${tA}</span><span style="color:#334">VS</span><span>${tB}</span></div>
+      <div style="font-size:10px;color:#446;margin-bottom:6px">Deuce @ ${deuceAt}-${deuceAt} · Golden pt @ ${cap}${scorer?` · Scorer: ${scorer}`:''}</div>
+      ${ko.confirmed?`<div style="font-size:12px;color:#00e676;margin-bottom:8px;font-weight:700">Sets: ${sw.a} – ${sw.b}</div>`:""}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:11px;color:#778">PTS/SET:</span>
+        <input class="pts-inp" type="number" min="5" max="50" value="${maxPts}" data-action="kpts" data-mid="${m.id}" ${ko.confirmed?"disabled":""}/>
+        <button class="btn-gold" data-action="skpts" data-mid="${m.id}" ${ko.confirmed?"disabled":""} style="${ko.confirmed?"opacity:0.3":""}">SET</button>
+        <button class="btn-red" data-action="reset-k" data-mid="${m.id}" style="margin-left:auto">🔄 RESET</button>
+      </div>
+    </div>`;
+  });
+  return h;
+}
+
+function attach(){
+  const lb=document.getElementById("lb"),pw=document.getElementById("pw");
+  if(lb){lb.onclick=()=>{if(pw.value===PASS){loggedIn=true;render();}else document.getElementById("le").textContent="Wrong password";};pw.onkeydown=e=>{if(e.key==="Enter")lb.click();};}
+  const lo=document.getElementById("lo");if(lo)lo.onclick=()=>{loggedIn=false;render();};
+  document.querySelectorAll("[data-tab]").forEach(el=>el.onclick=()=>{tab=el.dataset.tab;render();});
+  document.querySelectorAll("input[data-f]").forEach(el=>{el.oninput=()=>{const tid=el.dataset.tid;if(!pending[tid])pending[tid]={...gT(+tid)};pending[tid][el.dataset.f]=el.value;};});
+  document.querySelectorAll("[data-action]").forEach(el=>{
+    const a=el.dataset.action;
+    if(a==="tp1"){el.onclick=()=>{const t=gT(+el.dataset.tid);set(ref(db,`teams/t${el.dataset.tid}`),{...t,p1avail:t.p1avail===false});};} 
+    else if(a==="tp2"){el.onclick=()=>{const t=gT(+el.dataset.tid);set(ref(db,`teams/t${el.dataset.tid}`),{...t,p2avail:t.p2avail===false});};} 
+    else if(a==="save-team"){el.onclick=()=>{const tid=+el.dataset.tid;const cur=gT(tid);const upd={...cur,...(pending[tid]||{})};set(ref(db,`teams/t${tid}`),upd);delete pending[tid];el.textContent="✓ SAVED!";setTimeout(()=>el.textContent=`SAVE TEAM ${tid}`,1500);};} 
+    else if(a==="lpts"){return;}
+    else if(a==="slpts"){el.onclick=()=>{const id=+el.dataset.id;const inp=document.querySelector(`[data-action="lpts"][data-id="${id}"]`);const p=Math.max(5,Math.min(50,+inp.value||21));set(ref(db,`league/m${id}`),{...gL(id),maxPts:p});el.textContent="✓";setTimeout(()=>el.textContent="SET",1200);};} 
+    else if(a==="reset-l"){el.onclick=()=>{const id=+el.dataset.id;if(!confirm(`Reset Match ${id}? All scores will be cleared.`))return;set(ref(db,`league/m${id}`),{sA:0,sB:0,history:[],confirmed:false,live:false,maxPts:21,consec:null});};} 
+    else if(a==="kpts"){return;}
+    else if(a==="skpts"){el.onclick=()=>{const mid=el.dataset.mid;const inp=document.querySelector(`[data-action="kpts"][data-mid="${mid}"]`);const p=Math.max(5,Math.min(50,+inp.value||15));set(ref(db,`knockout/${mid}`),{...gK(mid),maxPts:p});el.textContent="✓";setTimeout(()=>el.textContent="SET",1200);};} 
+    else if(a==="reset-k"){el.onclick=()=>{const mid=el.dataset.mid;if(!confirm(`Reset ${mid}? All set scores will be cleared.`))return;set(ref(db,`knockout/${mid}`),{sets:[{a:0,b:0}],confirmed:false,live:false,maxPts:DP[mid]||15});};}
+  });
+}
+render();
+</script>
+</body>
+</html>
