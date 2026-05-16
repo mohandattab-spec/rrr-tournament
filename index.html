@@ -124,7 +124,7 @@ function render(){
     <div class="hdr">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
         <span style="font-size:26px">🏸</span>
-        <div><div class="title">ROTARY RACQUET ROYALE</div><div class="sub"><span class="dot"></span>LIVE · ${liveCount} ACTIVE · ${cc}/18 LEAGUE DONE</div></div>
+        <div><div class="title">ROTARY RACQUET ROYALE</div><div class="sub">${cc>=18&&liveCount===0?'<span style="color:#dc2626;font-weight:700;letter-spacing:2px;font-size:11px">⬤ TOURNAMENT ENDED</span>':'<span class="dot"></span>LIVE · '+liveCount+' ACTIVE · '+cc+'/18 LEAGUE DONE'}</div></div>
       </div>
       <div class="tabs">
         ${["live","standings","knockout","teams"].map(t=>`<button class="tab ${tab===t?"active":""}" data-tab="${t}">${t==="live"?"🟢 Live":t==="standings"?"📊 Standings":t==="knockout"?"🏆 Knockout":"👥 Teams"}</button>`).join("")}
@@ -154,6 +154,12 @@ function rChampionBanner(champion,runnerUp){
       <div style="font-family:'Bebas Neue',cursive;font-size:20px;color:#64748b;letter-spacing:4px;margin-top:4px">RUNNER-UP</div>
       <div style="font-size:17px;color:#334155;font-weight:700;margin-top:4px">${runnerUp}</div>
       ${ruT.p1||ruT.p2?`<div style="margin-top:8px"><span style="font-size:14px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;color:#475569">${[ruT.p1,ruT.p2].filter(Boolean).join(' & ')}</span></div>`:''}
+    </div>`:''}
+    ${runnerUp?`<div style="text-align:center;padding:22px 16px;margin-bottom:8px">
+      <div style="font-size:28px;margin-bottom:8px">🌟</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:6px;color:#0284c7;margin-bottom:6px">SEE YOU NEXT SEASON!</div>
+      <div style="font-size:13px;color:#64748b;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px">THANK YOU FOR BEING PART OF RRR 2026</div>
+      <div style="margin-top:12px;font-size:11px;color:#94a3b8;letter-spacing:3px">SERVE · SMASH · CELEBRATE</div>
     </div>`:''}`;
 }
 
