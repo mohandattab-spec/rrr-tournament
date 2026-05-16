@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>RRR Live Scores</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f8fafc;color:#1e293b;font-family:'Rajdhani','Segoe UI',sans-serif;min-height:100vh;}
+.hdr{background:linear-gradient(135deg,#ffffff,#f1f5f9);border-bottom:2px solid #e2e8f0;padding:14px 14px 0;}
+.title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:#0284c7;line-height:1;}
+.sub{font-size:10px;color:#64748b;letter-spacing:3px;margin-top:2px;}
+.dot{display:inline-block;width:7px;height:7px;background:#16a34a;border-radius:50%;margin-right:4px;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.tabs{display:flex;margin-top:12px;}
+.tab{background:transparent;border:none;border-bottom:3px solid transparent;color:#94a3b8;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.tab.active{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-bottom-color:#0284c7;color:#0284c7;}
+.content{max-width:700px;margin:0 auto;padding:14px 12px;}
+.sec{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:4px;margin-bottom:10px;}
+.court-card{border-radius:14px;padding:14px 16px;margin-bottom:14px;border-width:2px;border-style:solid;background:#ffffff;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.court-label{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:4px;margin-bottom:10px;}
+.match-info{font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:8px;}
+.score-row{display:flex;align-items:center;gap:8px;}
+.tb{flex:1;text-align:center;}
+.tn{font-size:13px;font-weight:700;margin-bottom:2px;}
+.pn{font-size:10px;color:#64748b;line-height:1.4;margin-bottom:4px;min-height:28px;}
+.sn{font-family:'Bebas Neue',cursive;font-size:58px;line-height:1;color:#1e293b;}
+.prog{display:flex;height:4px;border-radius:2px;overflow:hidden;margin-top:10px;background:#e2e8f0;}
+.deuce-view{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;text-align:center;margin:8px 0;animation:df 1s infinite;}
+@keyframes df{0%,100%{border-color:#f59e0b;}50%{border-color:#fbbf24;box-shadow:0 0 14px rgba(251,191,36,0.2);}}
+.deuce-t{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:5px;color:#d97706;}
+.idle-court{border-radius:14px;padding:14px 16px;margin-bottom:14px;background:#f1f5f9;border:1.5px solid #e2e8f0;}
+.stbl{width:100%;border-collapse:collapse;font-size:12px;}
+.stbl th{padding:7px 8px;color:#0284c7;font-weight:700;letter-spacing:1px;border-bottom:2px solid #bae6fd;}
+.stbl td{padding:6px 8px;border-bottom:1px solid #e2e8f0;}
+.qb{background:#dcfce7;color:#166534;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:700;}
+.ko-card{border-radius:12px;padding:13px 14px;margin-bottom:10px;background:#ffffff;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #e2e8f0;}
+.set-done{background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:6px 11px;margin-bottom:5px;font-size:11px;color:#166534;font-weight:700;}
+/* Champion & Runner-up */
+.champ{background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fbbf24;border-radius:14px;padding:22px;text-align:center;margin-bottom:14px;box-shadow:0 4px 20px rgba(251,191,36,0.2);}
+.runner{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px solid #94a3b8;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px;box-shadow:0 4px 10px rgba(0,0,0,0.05);}
+.team-view{background:#ffffff;border:1px solid #e2e8f0;border-radius:11px;padding:12px 14px;margin-bottom:9px;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+.empty{text-align:center;padding:48px 20px;color:#94a3b8;}
+/* Scorer credit badge */
+.scorer-badge{display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;border:1px solid #0284c730;color:#0284c7;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-top:4px;}
+</style>
+</head>
+<body>
+<div id="app"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#446;font-size:12px;letter-spacing:2px"><span class="dot"></span>CONNECTING...</div></div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const FC={apiKey:"AIzaSyBYKxzFoQAKKddALIDqtHtsKqlQkes3ax4",authDomain:"rrr-tournamet.firebaseapp.com",databaseURL:"https://rrr-tournamet-default-rtdb.firebaseio.com",projectId:"rrr-tournamet",storageBucket:"rrr-tournamet.firebasestorage.app",messagingSenderId:"368535382395",appId:"1:368535382395:web:c72ef4b64648b60ec175de"};
+const fb=initializeApp(FC),db=getDatabase(fb);
+
+// Courts 3→1, 4→2, 5→3
+const LM=[{id:1,tA:"Team 1",tB:"Team 11",court:1,time:"10:00 AM"},{id:2,tA:"Team 13",tB:"Team 8",court:2,time:"10:00 AM"},{id:3,tA:"Team 5",tB:"Team 3",court:3,time:"10:00 AM"},{id:4,tA:"Team 15",tB:"Team 14",court:1,time:"10:15 AM"},{id:5,tA:"Team 16",tB:"Team 10",court:2,time:"10:15 AM"},{id:6,tA:"Team 2",tB:"Team 4",court:3,time:"10:15 AM"},{id:7,tA:"Team 1",tB:"Team 18",court:1,time:"10:30 AM"},{id:8,tA:"Team 13",tB:"Team 6",court:2,time:"10:30 AM"},{id:9,tA:"Team 5",tB:"Team 7",court:3,time:"10:30 AM"},{id:10,tA:"Team 15",tB:"Team 12",court:1,time:"10:45 AM"},{id:11,tA:"Team 16",tB:"Team 9",court:2,time:"10:45 AM"},{id:12,tA:"Team 2",tB:"Team 17",court:3,time:"10:45 AM"},{id:13,tA:"Team 11",tB:"Team 18",court:1,time:"11:00 AM"},{id:14,tA:"Team 8",tB:"Team 6",court:2,time:"11:00 AM"},{id:15,tA:"Team 3",tB:"Team 7",court:3,time:"11:00 AM"},{id:16,tA:"Team 14",tB:"Team 12",court:1,time:"11:15 AM"},{id:17,tA:"Team 10",tB:"Team 9",court:2,time:"11:15 AM"},{id:18,tA:"Team 4",tB:"Team 17",court:3,time:"11:15 AM"}];
+const QF=[{id:"QF1",sA:"Q2",sB:"Q5",court:1,time:"11:30 AM"},{id:"QF2",sA:"Q4",sB:"Q3",court:2,time:"11:30 AM"},{id:"QF3",sA:"Q7",sB:"Q6",court:1,time:"11:50 AM"},{id:"QF4",sA:"Q1",sB:"Q8",court:2,time:"11:50 AM"}];
+const SF=[{id:"SF1",sA:"W.QF1",sB:"W.QF2",court:1,time:"12:15 PM"},{id:"SF2",sA:"W.QF3",sB:"W.QF4",court:2,time:"12:15 PM"}];
+const FN={id:"F1",sA:"W.SF1",sB:"W.SF2",court:1,time:"12:50 PM"};
+const CC={1:"#0284c7",2:"#e67e22",3:"#16a34a"};
+const COURTS=[1,2,3];
+
+let tab="live",ld={},kd={},td={};
+onValue(ref(db,"league"),s=>{ld=s.val()||{};render();});
+onValue(ref(db,"knockout"),s=>{kd=s.val()||{};render();});
+onValue(ref(db,"teams"),s=>{td=s.val()||{};render();});
+
+const gL=id=>ld[`m${id}`]||{sA:0,sB:0,confirmed:false,live:false,maxPts:21};
+const gK=id=>kd[id]||{sets:[{a:0,b:0}],confirmed:false,live:false};
+const gT=id=>td[`t${id}`]||{name:`Team ${id}`,p1:"",p2:"",p1avail:true,p2avail:true};
+const tN=id=>gT(id).name||`Team ${id}`;
+const tNum=s=>parseInt(s.split(" ")[1]);
+
+// ── Deuce logic ──────────────────────────────────────────────
+function getDeuceAt(max){return max-1;}
+function getCap(max){return max===21?30:21;}
+function isDeuceActive(sA,sB,max){const d=getDeuceAt(max);return sA>=d&&sB>=d;}
+
+function calcStandings(){
+  const map={};for(let i=1;i<=18;i++)map[`Team ${i}`]={team:tN(i),wins:0,losses:0,pf:0,pa:0,diff:0,pts:0};
+  LM.forEach(m=>{const s=gL(m.id);if(!s.confirmed)return;map[m.tA].pf+=s.sA;map[m.tA].pa+=s.sB;map[m.tB].pf+=s.sB;map[m.tB].pa+=s.sA;if(s.sA>s.sB){map[m.tA].wins++;map[m.tA].pts+=2;map[m.tB].losses++;}else{map[m.tB].wins++;map[m.tB].pts+=2;map[m.tA].losses++;}});
+  Object.values(map).forEach(r=>r.diff=r.pf-r.pa);
+  return Object.values(map).sort((a,b)=>b.pts-a.pts||b.diff-a.diff);
+}
+
+function gKT(slot){
+  const q=calcStandings().slice(0,8);
+  if(slot.startsWith("Q")){const r=parseInt(slot.slice(1))-1;return q[r]?.team||slot;}
+  if(slot.startsWith("W.QF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=QF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  if(slot.startsWith("W.SF")){const id=slot.slice(2);const s=gK(id);if(!s.confirmed)return slot;const m=SF.find(x=>x.id===id);const w=s.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});return w.a>w.b?gKT(m.sA):gKT(m.sB);}
+  return slot;
+}
+
+// Get team number from team name (works for both custom names via td lookup)
+function getTeamNumByName(teamName){
+  for(let i=1;i<=18;i++){if(tN(i)===teamName)return i;}
+  return null;
+}
+
+function renderTeamPlayers(teamName){
+  const num=getTeamNumByName(teamName);
+  if(!num) return '';
+  const t=gT(num);
+  let html='';
+  if(t.p1) html+=`<div style="font-size:12px;color:#1e293b;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;margin-top:3px"><span style="color:${t.p1avail!==false?'#16a34a':'#dc2626'}">●</span> ${t.p1}</div>`;
+  if(t.p2) html+=`<div style="font-size:12px;color:#1e293b;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;margin-top:2px"><span style="color:${t.p2avail!==false?'#16a34a':'#dc2626'}">●</span> ${t.p2}</div>`;
+  return html;
+}
+
+function render(){
+  const standings=calcStandings();
+  const cc=LM.filter(m=>gL(m.id).confirmed).length;
+  const liveLeague=LM.filter(m=>gL(m.id).live&&!gL(m.id).confirmed);
+  const liveKO=[...QF,...SF,FN].filter(m=>gK(m.id).live&&!gK(m.id).confirmed);
+  const liveCount=liveLeague.length+liveKO.length;
+  const fKO=gK("F1");
+  const fW=fKO.sets.reduce((a,sv)=>{if(sv.confirmed){if(sv.a>sv.b)a.a++;else a.b++;}return a;},{a:0,b:0});
+  const champion=fKO.confirmed?(fW.a>fW.b?gKT(FN.sA):gKT(FN.sB)):null;
+  const runnerUp=fKO.confirmed?(fW.a>fW.b?gKT(FN.sB):gKT(FN.sA)):null;
+
+  document.getElementById("app").innerHTML=`
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <span style="font-size:26px">🏸</span>
+        <div><div class="title">ROTARY RACQUET ROYALE</div><div class="sub"><span class="dot"></span>LIVE · ${liveCount} ACTIVE · ${cc}/18 LEAGUE DONE</div></div>
+      </div>
+      <div class="tabs">
+        ${["live","standings","knockout","teams"].map(t=>`<button class="tab ${tab===t?"active":""}" data-tab="${t}">${t==="live"?"🟢 Live":t==="standings"?"📊 Standings":t==="knockout"?"🏆 Knockout":"👥 Teams"}</button>`).join("")}
+      </div>
+    </div>
+    <div class="content">
+      ${champion?rChampionBanner(champion,runnerUp):""}
+      ${tab==="live"?rLive(liveLeague,liveKO,cc):tab==="standings"?rStandings(standings,cc):tab==="knockout"?rKnockout():rTeams()}
+    </div>`;
+  document.querySelectorAll("[data-tab]").forEach(el=>el.onclick=()=>{tab=el.dataset.tab;render();});
+}
+
+function rChampionBanner(champion,runnerUp){
+  const champNum=getTeamNumByName(champion);
+  const ruNum=getTeamNumByName(runnerUp);
+  const champT=champNum?gT(champNum):{};
+  const ruT=ruNum?gT(ruNum):{};
+  return `
+    <div class="champ">
+      <div style="font-size:40px">🏆</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:28px;color:#b45309;letter-spacing:5px;margin-top:4px">CHAMPION</div>
+      <div style="font-size:22px;color:#1e293b;font-weight:700;margin-top:6px">${champion}</div>
+      ${champT.p1||champT.p2?`<div style="margin-top:10px"><span style="font-size:15px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;color:#7c3aed">${[champT.p1,champT.p2].filter(Boolean).join(' & ')}</span></div>`:''}
+    </div>
+    ${runnerUp?`<div class="runner">
+      <div style="font-size:28px">🥈</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:20px;color:#64748b;letter-spacing:4px;margin-top:4px">RUNNER-UP</div>
+      <div style="font-size:17px;color:#334155;font-weight:700;margin-top:4px">${runnerUp}</div>
+      ${ruT.p1||ruT.p2?`<div style="margin-top:8px"><span style="font-size:14px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;color:#475569">${[ruT.p1,ruT.p2].filter(Boolean).join(' & ')}</span></div>`:''}
+    </div>`:''}`;
+}
+
+function rLive(liveLeague,liveKO,doneCount){
+  let html="";
+
+  COURTS.forEach(courtNum=>{
+    const cc=CC[courtNum];
+    const lm=liveLeague.find(m=>m.court===courtNum);
+    const km=liveKO.find(m=>m.court===courtNum);
+    const active=lm||km;
+
+    if(active){
+      if(lm){
+        const s=gL(lm.id);
+        const {sA=0,sB=0,maxPts=21}=s;
+        const tAn=tN(tNum(lm.tA)),tBn=tN(tNum(lm.tB));
+        const tAd=gT(tNum(lm.tA)),tBd=gT(tNum(lm.tB));
+        const deuce=isDeuceActive(sA,sB,maxPts);
+        const cap=getCap(maxPts);
+        const scorerName=s.scorerName||s.scoredBy||'';
+        html+=`<div class="court-card" style="background:linear-gradient(135deg,#f0fdf4,#ffffff);border-color:${cc}">
+          <div class="court-label" style="color:${cc}">🟢 COURT ${courtNum}</div>
+          <div class="match-info">Match ${lm.id} · League · ${lm.time} · First to ${maxPts}</div>
+          ${scorerName?`<div style="margin-bottom:6px"><span class="scorer-badge">🎯 Scorer: ${scorerName}</span></div>`:''}
+          ${deuce?`<div class="deuce-view"><div class="deuce-t">🏸 DEUCE!</div><div style="font-size:10px;color:#92400e;margin-top:2px">Win by 2 consecutive · Golden pt @ ${cap}</div></div>`:""}
+          <div class="score-row">
+            <div class="tb">
+              <div class="tn" style="color:${sA>sB?deuce?"#d97706":"#1e293b":"#94a3b8"}">${tAn}</div>
+              <div class="pn">${tAd.p1?`<span style="color:${tAd.p1avail!==false?"#16a34a":"#dc2626"}">●</span> ${tAd.p1}<br>`:""}${tAd.p2?`<span style="color:${tAd.p2avail!==false?"#16a34a":"#dc2626"}">●</span> ${tAd.p2}`:""}</div>
+              <div class="sn" style="color:${sA>sB?deuce?"#d97706":"#1e293b":"#cbd5e1"}">${sA}</div>
+            </div>
+            <div style="color:#e2e8f0;font-weight:900;font-size:20px;padding-bottom:32px">–</div>
+            <div class="tb">
+              <div class="tn" style="color:${sB>sA?deuce?"#d97706":"#1e293b":"#94a3b8"}">${tBn}</div>
+              <div class="pn">${tBd.p1?`<span style="color:${tBd.p1avail!==false?"#16a34a":"#dc2626"}">●</span> ${tBd.p1}<br>`:""}${tBd.p2?`<span style="color:${tBd.p2avail!==false?"#16a34a":"#dc2626"}">●</span> ${tBd.p2}`:""}</div>
+              <div class="sn" style="color:${sB>sA?deuce?"#d97706":"#1e293b":"#cbd5e1"}">${sB}</div>
+            </div>
+          </div>
+          ${!deuce?`<div class="prog"><div style="width:${Math.min(50,(sA/maxPts)*100)}%;background:#00c2ff;border-radius:2px;transition:width 0.2s"></div><div style="flex:1"></div><div style="width:${Math.min(50,(sB/maxPts)*100)}%;background:#ff6b35;border-radius:2px;transition:width 0.2s"></div></div>`:""}
+        </div>`;
+      } else if(km){
+        const ko=gK(km.id);
+        const tA=gKT(km.sA),tB=gKT(km.sB);
+        const sw=ko.sets.reduce((a,s)=>{if(s.confirmed){if(s.a>s.b)a.a++;else if(s.b>s.a)a.b++;}return a;},{a:0,b:0});
+        const curSet=ko.sets.find(s=>!s.confirmed)||{a:0,b:0};
+        const maxPts=ko.maxPts||15;
+        const deuce=isDeuceActive(curSet.a,curSet.b,maxPts);
+        const cap=getCap(maxPts);
+        const scorerName=ko.scorerName||ko.scoredBy||'';
+        html+=`<div class="court-card" style="background:linear-gradient(135deg,#f0fdf4,#ffffff);border-color:${cc}">
+          <div class="court-label" style="color:${cc}">🟢 COURT ${courtNum}</div>
+          <div class="match-info">${km.id} · ${km.time} · Best of 3 · ${maxPts} pts/set</div>
+          ${scorerName?`<div style="margin-bottom:6px"><span class="scorer-badge">🎯 Scorer: ${scorerName}</span></div>`:''}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="flex:1"><div class="tn">${tA}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">sets won</div></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-family:'Bebas Neue',cursive;font-size:40px;color:${sw.a>sw.b?"#1e293b":"#cbd5e1"}">${sw.a}</span>
+              <span style="color:#e2e8f0;font-size:18px;font-weight:900">–</span>
+              <span style="font-family:'Bebas Neue',cursive;font-size:40px;color:${sw.b>sw.a?"#1e293b":"#cbd5e1"}">${sw.b}</span>
+            </div>
+            <div style="flex:1;text-align:right"><div class="tn">${tB}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">sets won</div></div>
+          </div>
+          ${deuce?`<div class="deuce-view"><div class="deuce-t">🏸 DEUCE!</div><div style="font-size:10px;color:#92400e;margin-top:2px">Current set · Win by 2 · Golden pt @ ${cap}</div></div>`:""}
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">CURRENT SET: ${curSet.a} – ${curSet.b}</div>
+          ${ko.sets.filter(s=>s.confirmed).map((s,i)=>`<div class="set-done">Set ${i+1}: ${s.a>s.b?tA:tB} wins ${s.a}–${s.b}</div>`).join("")}
+        </div>`;
+      }
+    } else {
+      const nextLeague=LM.filter(m=>!gL(m.id).confirmed&&!gL(m.id).live&&m.court===courtNum);
+      const nextKO=[...QF,...SF,FN].filter(m=>!gK(m.id).confirmed&&!gK(m.id).live&&m.court===courtNum);
+      const next=nextLeague[0]||nextKO[0];
+      html+=`<div class="idle-court">
+        <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:4px;color:#64748b;margin-bottom:6px">⏸ COURT ${courtNum}</div>
+        ${next?`<div style="font-size:12px;color:#94a3b8">Next: ${next.id?next.id:`Match ${next.id}`} at ${next.time}</div>`:`<div style="font-size:12px;color:#cbd5e1">No upcoming matches</div>`}
+      </div>`;
+    }
+  });
+
+  const recent=LM.filter(m=>gL(m.id).confirmed).reverse();
+  if(recent.length){
+    html+=`<div class="sec" style="color:#1e293b;margin-top:4px">✓ RECENTLY COMPLETED</div>`;
+    recent.forEach(m=>{
+      const s=gL(m.id);
+      const tAn=tN(tNum(m.tA)),tBn=tN(tNum(m.tB));
+      const winner=s.sA>s.sB?tAn:tBn;
+      const scorer=s.scorerName||s.scoredBy||'';
+      const tAnum=tNum(m.tA), tBnum=tNum(m.tB);
+      const tAd2=gT(tAnum), tBd2=gT(tBnum);
+      const tAplayers=[tAd2.p1,tAd2.p2].filter(Boolean).join(' & ');
+      const tBplayers=[tBd2.p1,tBd2.p2].filter(Boolean).join(' & ');
+      html+=`<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;color:${CC[m.court]};font-weight:700;letter-spacing:1px">MATCH ${m.id} · COURT ${m.court} · ${m.time}</div>
+          ${scorer?`<span class="scorer-badge">🎯 ${scorer}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;text-align:left">
+            <div style="font-size:13px;color:${s.sA>s.sB?"#16a34a":"#475569"};font-weight:700">${tAn}</div>
+            ${tAplayers?`<div style="font-size:12px;color:#1e293b;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;margin-top:3px">👥 ${tAplayers}</div>`:''}
+          </div>
+          <div style="text-align:center;min-width:80px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:26px;color:#1e293b;line-height:1">${s.sA} – ${s.sB}</div>
+            <div style="font-size:10px;color:#16a34a;font-weight:700;margin-top:2px">✓ ${winner} wins</div>
+          </div>
+          <div style="flex:1;text-align:right">
+            <div style="font-size:13px;color:${s.sB>s.sA?"#16a34a":"#475569"};font-weight:700">${tBn}</div>
+            ${tBplayers?`<div style="font-size:12px;color:#1e293b;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;margin-top:3px">👥 ${tBplayers}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if(!liveLeague.length&&!liveKO.length&&doneCount===0){
+    return `<div class="empty"><div style="font-size:38px">⏳</div><div style="margin-top:8px;font-size:14px">Tournament hasn't started</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Courts will light up when scorers go live</div></div>`;
+  }
+  return html;
+}
+
+function rStandings(standings,doneCount){
+  if(!doneCount) return `<div class="empty"><div style="font-size:36px">📊</div><div style="margin-top:8px">Standings appear once matches complete</div></div>`;
+  const rows=standings.map((r,i)=>{
+    const isQ=i<8;
+    const tnum=getTeamNumByName(r.team);
+    const td2=tnum?gT(tnum):{};
+    const players=[td2.p1,td2.p2].filter(Boolean).join(' & ');
+    return `<tr style="background:${isQ?"#f0fdf4":i%2===0?"#ffffff":"#f8fafc"};border-bottom:1px solid #e2e8f0">
+      <td style="text-align:center;padding:6px 7px;color:${isQ?"#16a34a":"#64748b"};font-weight:700">${i+1}</td>
+      <td style="padding:6px 7px">
+        <div style="color:${isQ?"#1e293b":"#475569"};font-weight:${isQ?600:400}">${r.team}</div>
+        ${players?`<div style="font-size:12px;color:#1e293b;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:0.5px;margin-top:3px">👥 ${players}</div>`:""}
+      </td>
+      <td style="text-align:center;color:#16a34a">${r.wins}</td>
+      <td style="text-align:center;color:#dc2626">${r.losses}</td>
+      <td style="text-align:center;color:#475569">${r.pf}</td>
+      <td style="text-align:center;color:#475569">${r.pa}</td>
+      <td style="text-align:center;color:${r.diff>=0?"#16a34a":"#dc2626"};font-weight:700">${r.diff>=0?"+":""}${r.diff}</td>
+      <td style="text-align:center">${isQ?`<span class="qb">Q${i+1}</span>`:"—"}</td>
+    </tr>`;
+  }).join("");
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:11px;color:#64748b">Top 8 qualify for QF</span><span style="font-size:10px;background:#dcfce7;color:#166534;border-radius:6px;padding:2px 9px;font-weight:700">${doneCount}/18</span></div>
+  <div style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;overflow-x:auto"><table class="stbl"><thead><tr style="background:#f8fafc">${["#","Team","W","L","PF","PA","Diff",""].map(h=>`<th style="text-align:${h==="Team"?"left":"center"}">${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function rKnockout(){
+  const secs=[{title:"⚡ QUARTER FINALS",color:"#0284c7",matches:QF},{title:"🔥 SEMI FINALS",color:"#e67e22",matches:SF},{title:"👑 GRAND FINAL",color:"#854d0e",matches:[FN]}];
+  const anyStarted=[...QF,...SF,FN].some(m=>{const s=gK(m.id);return s.confirmed||s.live||(s.sets&&s.sets.some(sv=>sv.a>0||sv.b>0));});
+  if(!anyStarted) return `<div class="empty"><div style="font-size:36px">🏆</div><div style="margin-top:8px">Knockout stage hasn't started</div></div>`;
+  return secs.map(sec=>`
+    <div class="sec" style="color:${sec.color}">${sec.title}</div>
+    ${sec.matches.map(m=>{
+      const ko=gK(m.id);const{sets=[{a:0,b:0}],confirmed=false,live=false}=ko;
+      const tA=gKT(m.sA),tB=gKT(m.sB);const cc=CC[m.court]||"#0284c7";
+      const sw=sets.reduce((a,s)=>{if(s.confirmed){if(s.a>s.b)a.a++;else if(s.b>s.a)a.b++;}return a;},{a:0,b:0});
+      const winner=confirmed?(sw.a>sw.b?tA:tB):null;
+      const scorer=ko.scorerName||ko.scoredBy||'';
+      return `<div class="ko-card" style="background:${confirmed?"linear-gradient(135deg,#f0fdf4,#dcfce7)":live?"linear-gradient(135deg,#f0fdf4,#ffffff)":"#ffffff"};border:1.5px solid ${confirmed?"#22c55e":live?cc:cc};">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;color:${cc};font-weight:700;letter-spacing:2px">${m.id} · COURT ${m.court}</span><span style="font-size:10px;color:#94a3b8">${m.time}${live?" · 🟢 LIVE":""}</span></div>
+        ${scorer?`<div style="margin-bottom:6px"><span class="scorer-badge">🎯 Scorer: ${scorer}</span></div>`:''}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="flex:1">
+            <div style="font-size:13px;color:${winner===tA?"#16a34a":"#475569"};font-weight:700">${tA}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:3px">${renderTeamPlayers(tA)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-family:'Bebas Neue',cursive;font-size:36px;color:${winner===tA?"#16a34a":sw.a>sw.b?"#1e293b":"#cbd5e1"}">${sw.a}</span><span style="color:#e2e8f0;font-size:16px;font-weight:900">–</span><span style="font-family:'Bebas Neue',cursive;font-size:36px;color:${winner===tB?"#16a34a":sw.b>sw.a?"#1e293b":"#cbd5e1"}">${sw.b}</span></div>
+          <div style="flex:1;text-align:right">
+            <div style="font-size:13px;color:${winner===tB?"#16a34a":"#475569"};font-weight:700">${tB}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:3px;text-align:right">${renderTeamPlayers(tB)}</div>
+          </div>
+        </div>
+        ${sets.filter(s=>s.confirmed).map((s,i)=>`<div class="set-done">Set ${i+1}: ${s.a>s.b?tA:tB} wins ${s.a}–${s.b}</div>`).join("")}
+        ${confirmed?`<div style="text-align:center;font-size:12px;color:#16a34a;font-weight:700;margin-top:6px">🏆 ${winner} wins</div>`:""}
+      </div>`;
+    }).join("")}
+    <div style="margin-bottom:14px"></div>`).join("");
+}
+
+function rTeams(){
+  let h=`<div class="sec" style="color:#0284c7">👥 ALL TEAMS</div>`;
+  for(let i=1;i<=18;i++){
+    const t=gT(i);
+    h+=`<div class="team-view">
+      <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:#0284c7;margin-bottom:7px">${t.name||`Team ${i}`}</div>
+      ${t.p1?`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:14px;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:0.5px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.p1avail!==false?"#16a34a":"#dc2626"}"></span><span style="color:${t.p1avail!==false?"#1e293b":"#94a3b8"}">${t.p1}</span><span style="font-size:10px;color:${t.p1avail!==false?"#16a34a":"#dc2626"};margin-left:4px;font-weight:400">${t.p1avail!==false?"✓":"✗"}</span></div>`:`<div style="font-size:12px;color:#cbd5e1;margin-bottom:4px">Player 1: TBD</div>`}
+      ${t.p2?`<div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:0.5px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.p2avail!==false?"#16a34a":"#dc2626"}"></span><span style="color:${t.p2avail!==false?"#1e293b":"#94a3b8"}">${t.p2}</span><span style="font-size:10px;color:${t.p2avail!==false?"#16a34a":"#dc2626"};margin-left:4px;font-weight:400">${t.p2avail!==false?"✓":"✗"}</span></div>`:`<div style="font-size:12px;color:#cbd5e1">Player 2: TBD</div>`}
+    </div>`;
+  }
+  return h;
+}
+</script>
+</body>
+</html>
